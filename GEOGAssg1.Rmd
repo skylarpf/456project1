@@ -1,0 +1,79 @@
+---
+title: "GEOG 456"
+output: html_notebook
+---
+
+```{r}
+getwd()
+library(RColorBrewer)
+library(ggplot2)
+library(gganimate)
+library(dplyr)
+library(gifski)
+library(png)
+library(sp)
+library(raster)
+library(rgdal)
+library(tmap)
+library(tmaptools)
+library(spdep)
+library(rgeos)
+library(geosphere)
+library(spatstat)
+library(maptools)
+library(knitr)
+library(kableExtra)
+library(plotly)
+library(corrplot)
+library(shinyjs)
+```
+
+```{r}
+sol3=read.csv("/Users/ngigot/Desktop/GEOG456/cleanedredata3.csv")
+plot1=ggplot(sol3, aes(x=Year, y=SolarOutput))+geom_col(aes(fill=Continent),width=.7) + labs(y="Solar Energy Generation (TWh)") + theme_minimal() + scale_fill_brewer(palette="Set1")
+plot1
+```
+
+```{r}
+plot2=ggplot(data=sol3, aes(x=Year, y=SolarOutput, group=Continent))+geom_line(aes(color=Continent))+labs(y="Solar Energy Generation (TWh)") + theme_minimal() + scale_fill_brewer(palette="Set1")
+plot2
+```
+
+```{r}
+ggplot(sol3,
+       aes(x=Continent, y=SolarOutput, label=Continent, color=Continent)) + 
+  geom_point(stat='identity',size=15) + 
+  geom_segment(aes(
+    y=0,
+    x=Continent,
+    yend=SolarOutput,
+    xend=Continent)
+  ) + 
+  geom_text(color="black", size=3) + 
+  theme(legend.position = "none") +
+  labs(title = "Year: {frame_time}", x= "Year", y="Solar Energy Generation (TWh)") + transition_time(Year) + 
+  ease_aes('linear') + theme_minimal() + scale_fill_brewer(palette="Set2")
+```
+```{r}
+ggplot(sol3,
+       aes(x=Continent, y=SolarOutput, label=Continent, color=Continent)) + 
+  geom_point(stat='identity',size=15) + 
+  geom_segment(aes(
+    y=0,
+    x=Continent,
+    yend=SolarOutput,
+    xend=Continent)
+  ) + 
+  geom_text(color="black", size=3) + 
+  theme(legend.position = "none") +
+  labs(title = "Year: {frame_time}", x= "Year", y="Solar Energy Generation (TWh)") + transition_time(Year) + 
+  ease_aes('linear') + theme_minimal() + scale_fill_brewer(palette="Set2")
+```
+
+```{r}
+continents=shapefile("/Users/ngigot/Desktop/GEOG456/continent shapefile/continent.shp")
+map=read.csv("/Users/ngigot/Desktop/GEOG456/map.csv")
+mapcont=merge(continents, map, by.x="CONTINENT", by.y="Continent")
+tmap_mode("view")
+tm_shape(mapcont) + tm_basemap("Esri.WorldGrayCanvas") + tm_polygons("X2018", title = "Global Solar Generation", style = "sd", palette = "Greens", alpha = 0.4, border.col = "gray0", border.alpha = 0.6, id="CONTINENT", popup.vars = c("Solar Energy Generation (TWh)" = "X2018")) + tm_tiles("CartoDB.PositronOnlyLabels") + tm_scale_bar() + tm_view(view.legend.position = c("right", "bottom")) 
+```
